@@ -228,11 +228,16 @@ impl Server {
 
         // building the TcpListener
         let (server, local_addr) = {
+            let addr: &socket2::SockAddr = &config.addr.to_socket_addrs().unwrap().next().unwrap().into();
             let socket = socket2::Socket::new(
-                socket2::Domain::ipv4(), socket2::Type::stream(), None).unwrap();
+                if let Some(_) = addr.as_inet() {
+                    socket2::Domain::ipv4()
+                } else {
+                    socket2::Domain::ipv6()
+                }, socket2::Type::stream(), None).unwrap();
             socket.set_reuse_address(true).unwrap();
             socket.set_reuse_port(true).unwrap();
-            socket.bind(&config.addr.to_socket_addrs().unwrap().next().unwrap().into()).unwrap();
+            socket.bind(addr).unwrap();
             socket.listen(128).unwrap();
             let listener = socket.into_tcp_listener();
             let local_addr = try!(listener.local_addr());
