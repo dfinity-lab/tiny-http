@@ -235,6 +235,9 @@ impl Server {
                 } else {
                     socket2::Domain::ipv6()
                 }, socket2::Type::stream(), None).unwrap();
+            if let Some(_) = addr.as_inet6() {
+                socket.set_only_v6(false).unwrap();
+            }
             socket.set_reuse_address(true).unwrap();
             socket.set_reuse_port(true).unwrap();
             socket.bind(addr).unwrap();
